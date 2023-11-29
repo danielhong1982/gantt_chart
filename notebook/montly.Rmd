@@ -1,0 +1,65 @@
+---
+title: "Monthly Planning"
+subtitle: "December 2023"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("ganttrify")
+library("readxl")
+library("dplyr")
+library("ggplot2")
+
+project = readxl::read_xlsx("../data/gantt_chart_data_Nov_28_2023.xlsx", sheet = "project")
+spots = readxl::read_xlsx("../data/gantt_chart_data_Nov_28_2023.xlsx", sheet = "spots")
+
+project <- project |>
+  mutate(start_date = as.Date(start_date)) |>
+  mutate(end_date = as.Date(end_date))
+spots <- spots |>
+  mutate(spot_date = as.Date(spot_date))
+```
+
+```{r warning=FALSE}
+p <- ganttrify(
+  project = project,
+  spots = spots,
+  by_date = TRUE,
+  exact_date = TRUE,
+  mark_quarters = TRUE,
+  project_start_date = "2023-12-01",
+  font_family = "Roboto Condensed",
+  spot_size_text_relative = 1.5,
+  month_number_label = FALSE,
+  month_date_label  = TRUE,
+  x_axis_position = "bottom",
+  spot_fill = ggplot2::alpha(c("white"), 0.7),
+  spot_padding = ggplot2::unit(0.4, "lines"),
+  colour_palette =  MetBrewer::met.brewer("Lakota")
+)
+```
+
+```{r fig.align='center', fig.height=8, fig.show='hold', fig.width=12, warning=FALSE}
+p +
+  ggplot2::labs(title = "Monthly Planning",
+                subtitle = "December 2023",
+                caption = "STCube Pharmaceuticals, Inc.") + scale_x_date(date_labels = "%b %d", breaks = "1 day", date_minor_breaks = "1 day") + 
+   theme(axis.text.x = element_text(angle = 45, vjust = 0.1, hjust=0.1))
+```
+
+
+```{r}
+cairo_pdf(file = "../output/gantt_chart.pdf", width = 12, height = 8, family = "Roboto Condensed")  
+p +
+  ggplot2::labs(title = "Monthly Planning",
+                subtitle = "December 2023",
+                caption = "STCube Pharmaceuticals, Inc.") + scale_x_date(date_labels = "%b %d", breaks = "1 day", date_minor_breaks = "1 day") + 
+   theme(axis.text.x = element_text(angle = 45, vjust = 0.1, hjust=0.1))
+dev.off()
+```
+

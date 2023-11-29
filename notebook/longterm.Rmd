@@ -1,0 +1,64 @@
+---
+title: "Long-term Planning"
+subtitle: "Bi-specific, 2024-2025"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("ganttrify")
+library("readxl")
+library("dplyr")
+library("ggplot2")
+library("Cairo")
+
+project = readxl::read_xlsx("../data/gantt_chart_data_LongTerm.xlsx", sheet = "project")
+spots = readxl::read_xlsx("../data/gantt_chart_data_LongTerm.xlsx", sheet = "spots")
+
+project <- project |>
+  mutate(start_date = as.Date(start_date)) |>
+  mutate(end_date = as.Date(end_date))
+spots <- spots |>
+  mutate(spot_date = as.Date(spot_date))
+```
+
+```{r warning=FALSE}
+p <- ganttrify(
+  project = project,
+  spots = spots,
+  # by_date = TRUE,
+  # exact_date = TRUE,
+  mark_quarters = TRUE,
+  project_start_date = "2024-01-01",
+  font_family = "Roboto Condensed",
+  label_wrap = 32,
+  spot_size_text_relative = 1.2,
+  # month_number_label = FALSE,
+  month_date_label  = TRUE,
+  spot_fill = ggplot2::alpha(c("white"), 0.7),
+  spot_padding = ggplot2::unit(0.4, "lines"),
+  colour_palette =  MetBrewer::met.brewer("Lakota")
+)
+```
+
+```{r fig.align='center', fig.height=8, fig.show='hold', fig.width=12, warning=FALSE}
+p +
+  ggplot2::labs(title = "Quarterly Planning",
+                subtitle = "December 2023 - February 2024",
+                caption = "STCube Pharmaceuticals, Inc.")  #+ 
+  #scale_x_date(date_labels = "%b %d", date_breaks = "1 week", date_minor_breaks = "1 week") + 
+  #theme(axis.text.x = element_text(angle = 45, vjust = 0.1, hjust=0.1))
+```
+
+```{r}
+cairo_pdf(file = "../output/gantt_chart_quarterly_longterm.pdf", width = 12, height = 8, family = "Roboto Condensed")
+p +
+  ggplot2::labs(title = "Long-term Planning",
+                subtitle = "Bi-specific, 2024-2025",
+                caption = "STCube Pharmaceuticals, Inc.")
+dev.off()
+```
